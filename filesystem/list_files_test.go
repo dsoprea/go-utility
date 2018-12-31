@@ -10,7 +10,8 @@ import (
 )
 
 func TestListFiles_NoPredicate(t *testing.T) {
-	filesC, errC := ListFiles(appPath, nil)
+	scanPath := path.Join(appPath, "..")
+	filesC, errC := ListFiles(scanPath, nil)
 
 	visited := make([]VisitedFile, 0)
 
@@ -38,11 +39,9 @@ FilesRead:
 	}
 
 	checkedPathsSs := sort.StringSlice([]string{
-		path.Join(appPath, ".git", "objects"),
-		path.Join(appPath, "command"),
-		path.Join(appPath, "command", "gi_extract_from_images"),
-		path.Join(appPath, "utility.go"),
-		path.Join(appPath, "utility_test.go"),
+		path.Join(scanPath, ".git", "objects"),
+		path.Join(scanPath, "filesystem", "list_files.go"),
+		path.Join(scanPath, "filesystem", "list_files_test.go"),
 	})
 
 	checkedPathsSs.Sort()
@@ -61,7 +60,8 @@ FilesRead:
 }
 
 func TestListFiles_WithPredicate(t *testing.T) {
-	gitPath := path.Join(appPath, ".git")
+	scanPath := path.Join(appPath, "..")
+	gitPath := path.Join(scanPath, ".git")
 	gitObjectsPath := path.Join(gitPath, "objects")
 
 	filter := func(parent string, child os.FileInfo) (bool, error) {
@@ -75,7 +75,7 @@ func TestListFiles_WithPredicate(t *testing.T) {
 		return false, nil
 	}
 
-	filesC, errC := ListFiles(appPath, filter)
+	filesC, errC := ListFiles(scanPath, filter)
 
 	visited := make([]VisitedFile, 0)
 
