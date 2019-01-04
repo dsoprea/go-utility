@@ -11,5 +11,5 @@ var (
 
 func init() {
     goPath := os.Getenv("GOPATH")
-    appPath = path.Join(goPath, "src", "github.com", "RandomIngenuity", "go-utility", "filesystem")
+    appPath = path.Join(goPath, "src", "github.com", "randomingenuity", "go-utility", "filesystem")
 }
