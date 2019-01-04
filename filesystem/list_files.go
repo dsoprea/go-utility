@@ -53,6 +53,15 @@ func ListFiles(rootPath string, cb FileListFilterPredicate) (filesC chan Visited
             var thisPath string
             thisPath, queue = queue[0], queue[1:]
 
+            // Skip path if a symlink.
+
+            fi, err := os.Lstat(thisPath)
+            log.PanicIf(err)
+
+            if (fi.Mode() & os.ModeSymlink) > 0 {
+                continue
+            }
+
             // Read information.
 
             folderF, err := os.Open(thisPath)
@@ -73,6 +82,17 @@ func ListFiles(rootPath string, cb FileListFilterPredicate) (filesC chan Visited
                 }
 
                 for _, child := range children {
+                    filepath := path.Join(thisPath, child.Name())
+
+                    // Skip if a file symlink.
+
+                    fi, err := os.Lstat(filepath)
+                    log.PanicIf(err)
+
+                    if (fi.Mode() & os.ModeSymlink) > 0 {
+                        continue
+                    }
+
                     // If a predicate was given, determine if this child will be
                     // left behind.
                     if cb != nil {
@@ -89,8 +109,6 @@ func ListFiles(rootPath string, cb FileListFilterPredicate) (filesC chan Visited
                     }
 
                     // Push file to channel.
-
-                    filepath := path.Join(thisPath, child.Name())
 
                     vf := VisitedFile{
                         Filepath: filepath,
