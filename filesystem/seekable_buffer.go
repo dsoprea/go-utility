@@ -1,103 +1,108 @@
 package rifs
 
 import (
-    "io"
-    "os"
+	"io"
+	"os"
 
-    "github.com/dsoprea/go-logging"
+	"github.com/dsoprea/go-logging"
 )
 
 // SeekableBuffer is a simple memory structure that satisfies
 // `io.ReadWriteSeeker`.
 type SeekableBuffer struct {
-    data     []byte
-    position int64
+	data     []byte
+	position int64
 }
 
+// NewSeekableBuffer is a factory that returns a `*SeekableBuffer`.
 func NewSeekableBuffer() *SeekableBuffer {
-    data := make([]byte, 0)
+	data := make([]byte, 0)
 
-    return &SeekableBuffer{
-        data: data,
-    }
+	return &SeekableBuffer{
+		data: data,
+	}
 }
 
 func len64(data []byte) int64 {
-    return int64(len(data))
+	return int64(len(data))
 }
 
+// Len returns the number of bytes currently stored.
 func (sb *SeekableBuffer) Len() int {
-    return len(sb.data)
+	return len(sb.data)
 }
 
+// Write does a standard write to the internal slice.
 func (sb *SeekableBuffer) Write(p []byte) (n int, err error) {
-    defer func() {
-        if state := recover(); state != nil {
-            err = log.Wrap(state.(error))
-        }
-    }()
+	defer func() {
+		if state := recover(); state != nil {
+			err = log.Wrap(state.(error))
+		}
+	}()
 
-    // The current position we're already at is past the end of the data we
-    // actually have. Extend our buffer up to our current position.
-    if sb.position > len64(sb.data) {
-        extra := make([]byte, sb.position-len64(sb.data))
-        sb.data = append(sb.data, extra...)
-    }
+	// The current position we're already at is past the end of the data we
+	// actually have. Extend our buffer up to our current position.
+	if sb.position > len64(sb.data) {
+		extra := make([]byte, sb.position-len64(sb.data))
+		sb.data = append(sb.data, extra...)
+	}
 
-    positionFromEnd := len64(sb.data) - sb.position
-    tailCount := positionFromEnd - len64(p)
+	positionFromEnd := len64(sb.data) - sb.position
+	tailCount := positionFromEnd - len64(p)
 
-    var tailBytes []byte
-    if tailCount > 0 {
-        tailBytes = sb.data[len64(sb.data)-tailCount:]
-        sb.data = append(sb.data[:sb.position], p...)
-    } else {
-        sb.data = append(sb.data[:sb.position], p...)
-    }
+	var tailBytes []byte
+	if tailCount > 0 {
+		tailBytes = sb.data[len64(sb.data)-tailCount:]
+		sb.data = append(sb.data[:sb.position], p...)
+	} else {
+		sb.data = append(sb.data[:sb.position], p...)
+	}
 
-    if tailBytes != nil {
-        sb.data = append(sb.data, tailBytes...)
-    }
+	if tailBytes != nil {
+		sb.data = append(sb.data, tailBytes...)
+	}
 
-    len_ := len64(p)
-    sb.position += len_
+	dataSize := len64(p)
+	sb.position += dataSize
 
-    return int(len_), nil
+	return int(dataSize), nil
 }
 
+// Read does a standard read against the internal slice.
 func (sb *SeekableBuffer) Read(p []byte) (n int, err error) {
-    defer func() {
-        if state := recover(); state != nil {
-            err = log.Wrap(state.(error))
-        }
-    }()
+	defer func() {
+		if state := recover(); state != nil {
+			err = log.Wrap(state.(error))
+		}
+	}()
 
-    if sb.position >= len64(sb.data) {
-        return 0, io.EOF
-    }
+	if sb.position >= len64(sb.data) {
+		return 0, io.EOF
+	}
 
-    n = copy(p, sb.data[sb.position:])
-    sb.position += int64(n)
+	n = copy(p, sb.data[sb.position:])
+	sb.position += int64(n)
 
-    return n, nil
+	return n, nil
 }
 
+// Seek does a standard seek on the internal slice.
 func (sb *SeekableBuffer) Seek(offset int64, whence int) (n int64, err error) {
-    defer func() {
-        if state := recover(); state != nil {
-            err = log.Wrap(state.(error))
-        }
-    }()
+	defer func() {
+		if state := recover(); state != nil {
+			err = log.Wrap(state.(error))
+		}
+	}()
 
-    if whence == os.SEEK_SET {
-        sb.position = offset
-    } else if whence == os.SEEK_END {
-        sb.position = len64(sb.data) - offset
-    } else if whence == os.SEEK_CUR {
-        sb.position += offset
-    } else {
-        log.Panicf("seek whence is not valid: (%d)", whence)
-    }
+	if whence == os.SEEK_SET {
+		sb.position = offset
+	} else if whence == os.SEEK_END {
+		sb.position = len64(sb.data) - offset
+	} else if whence == os.SEEK_CUR {
+		sb.position += offset
+	} else {
+		log.Panicf("seek whence is not valid: (%d)", whence)
+	}
 
-    return sb.position, nil
+	return sb.position, nil
 }

@@ -5,6 +5,8 @@ import (
 	"github.com/golang/geo/s2"
 )
 
+// S2CellFromCoordinates returns an `S2` cell for the given real-world
+// coordinates.
 func S2CellFromCoordinates(latitude, longitude float64) s2.CellID {
 	ll := s2.LatLngFromDegrees(latitude, longitude)
 	cellId := s2.CellIDFromLatLng(ll)
