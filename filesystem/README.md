@@ -14,3 +14,7 @@ A recursive path walker that supports filters.
 # seekable_buffer
 
 A memory structure that satisfies `io.ReadWriteSeeker`.
+
+# copy_bytes_between_positions
+
+Given an `io.ReadWriteSeeker`, copy N bytes from one position to an earlier position.
