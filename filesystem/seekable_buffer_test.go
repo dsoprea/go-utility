@@ -499,3 +499,26 @@ func TestSeekableBuffer_Write_SeekAndWritePastEnd(t *testing.T) {
 		t.Fatalf("Data did not match.")
 	}
 }
+
+func TestSeekableBuffer_Bytes(t *testing.T) {
+	sb := NewSeekableBuffer()
+
+	data := []byte("hello")
+
+	_, err := sb.Write(data)
+	log.PanicIf(err)
+
+	_, err = sb.Seek(10, os.SEEK_SET)
+	log.PanicIf(err)
+
+	data2 := []byte("xhellox")
+
+	_, err = sb.Write(data2)
+	log.PanicIf(err)
+
+	expected := []byte("hello\000\000\000\000\000xhellox")
+
+	if bytes.Compare(sb.Bytes(), expected) != 0 {
+		t.Fatalf("Data did not match.")
+	}
+}

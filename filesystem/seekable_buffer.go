@@ -27,6 +27,11 @@ func len64(data []byte) int64 {
 	return int64(len(data))
 }
 
+// Bytes returns the underlying slice.
+func (sb *SeekableBuffer) Bytes() []byte {
+	return sb.data
+}
+
 // Len returns the number of bytes currently stored.
 func (sb *SeekableBuffer) Len() int {
 	return len(sb.data)
