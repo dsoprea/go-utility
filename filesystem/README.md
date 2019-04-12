@@ -1,10 +1,11 @@
+[![GoDoc](https://godoc.org/github.com/RandomIngenuity/go-utility/filesystem?status.svg)](https://godoc.org/github.com/RandomIngenuity/go-utility/filesystem)
 [![Build Status](https://travis-ci.org/RandomIngenuity/go-utility.svg?branch=master)](https://travis-ci.org/RandomIngenuity/go-utility)
 [![Coverage Status](https://coveralls.io/repos/github/RandomIngenuity/go-utility/badge.svg?branch=master)](https://coveralls.io/github/RandomIngenuity/go-utility?branch=master)
-[![GoDoc](https://godoc.org/github.com/RandomIngenuity/go-utility/filesystem?status.svg)](https://godoc.org/github.com/RandomIngenuity/go-utility/filesystem)
+[![Go Report Card](https://goreportcard.com/badge/github.com/RandomIngenuity/go-utility)](https://goreportcard.com/report/github.com/RandomIngenuity/go-utility)
 
 # bounceback_reader
 
-An `io.Reader` that re-seeks to where it is supposed to be before reading. Useful when the file-position is being reused for reads or writes at different positions in the same file resource.
+An `io.ReadSeeker` that returns to the right place before reading. Useful when the same file resource is being reused for reads or writes throughout that file.
 
 # list_files
 
