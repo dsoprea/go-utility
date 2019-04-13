@@ -380,7 +380,7 @@ func TestSeekableBuffer_Seek_End_Empty(t *testing.T) {
 	}
 }
 
-func TestSeekableBuffer_Seek_End_Nonempty(t *testing.T) {
+func TestSeekableBuffer_Seek_End_Nonempty_Zero(t *testing.T) {
 	sb := NewSeekableBuffer()
 
 	data := []byte("hello")
@@ -397,6 +397,27 @@ func TestSeekableBuffer_Seek_End_Nonempty(t *testing.T) {
 	log.PanicIf(err)
 
 	if position != int64(dataLen) {
+		t.Fatalf("The seek did not move to the last byte of a non-empty byte: (%d) != (%d)", position, dataLen)
+	}
+}
+
+func TestSeekableBuffer_Seek_End_Nonempty_Nonzero(t *testing.T) {
+	sb := NewSeekableBuffer()
+
+	data := []byte("hello")
+	dataLen := len(data)
+
+	n, err := sb.Write(data)
+	log.PanicIf(err)
+
+	if n != dataLen {
+		t.Fatalf("Exactly (%d) bytes weren't written: (%d)", dataLen, n)
+	}
+
+	position, err := sb.Seek(-2, os.SEEK_END)
+	log.PanicIf(err)
+
+	if position != 3 {
 		t.Fatalf("The seek did not move to the last byte of a non-empty byte: (%d) != (%d)", position, dataLen)
 	}
 }

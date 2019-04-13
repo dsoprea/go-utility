@@ -23,6 +23,16 @@ func NewSeekableBuffer() *SeekableBuffer {
 	}
 }
 
+// NewSeekableBufferWithBytes is a factory that returns a `*SeekableBuffer`.
+func NewSeekableBufferWithBytes(originalData []byte) *SeekableBuffer {
+	data := make([]byte, len(originalData))
+	copy(data, originalData)
+
+	return &SeekableBuffer{
+		data: data,
+	}
+}
+
 func len64(data []byte) int64 {
 	return int64(len(data))
 }
@@ -102,7 +112,7 @@ func (sb *SeekableBuffer) Seek(offset int64, whence int) (n int64, err error) {
 	if whence == os.SEEK_SET {
 		sb.position = offset
 	} else if whence == os.SEEK_END {
-		sb.position = len64(sb.data) - offset
+		sb.position = len64(sb.data) + offset
 	} else if whence == os.SEEK_CUR {
 		sb.position += offset
 	} else {
