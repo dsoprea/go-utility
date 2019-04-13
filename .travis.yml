@@ -7,7 +7,6 @@ go:
   - "1.9"
   - "1.8"
 install:
-  - go get github.com/randomingenuity/go-utility/...
   - go get -t ./...
   - go get github.com/mattn/goveralls
 script:
