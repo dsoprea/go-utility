@@ -36,6 +36,10 @@ func NewBouncebackWriter(ws io.WriteSeeker) (bw *BouncebackWriter, err error) {
 	return bw, nil
 }
 
+func (bw *BouncebackWriter) Position() int64 {
+	return bw.currentPosition
+}
+
 func (bw *BouncebackWriter) StatsWrites() int {
 	return bw.statsWrites
 }
@@ -71,7 +75,7 @@ func (bw *BouncebackWriter) Write(p []byte) (n int, err error) {
 
 	// Make sure we're where we're supposed to be.
 
-	realCurrentPosition, err := bw.ws.Seek(bw.currentPosition, os.SEEK_CUR)
+	realCurrentPosition, err := bw.ws.Seek(0, os.SEEK_CUR)
 	log.PanicIf(err)
 
 	if realCurrentPosition != bw.currentPosition {

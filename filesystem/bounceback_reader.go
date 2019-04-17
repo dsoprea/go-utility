@@ -37,6 +37,10 @@ func NewBouncebackReader(rs io.ReadSeeker) (br *BouncebackReader, err error) {
 	return br, nil
 }
 
+func (br *BouncebackReader) Position() int64 {
+	return br.currentPosition
+}
+
 // StatsReads returns the number of reads that have been attempted.
 func (br *BouncebackReader) StatsReads() int {
 	return br.statsReads
