@@ -101,6 +101,24 @@ func (sb *SeekableBuffer) Read(p []byte) (n int, err error) {
 	return n, nil
 }
 
+func (sb *SeekableBuffer) Truncate(size int64) (err error) {
+	defer func() {
+		if state := recover(); state != nil {
+			err = log.Wrap(state.(error))
+		}
+	}()
+
+	sizeInt := int(size)
+	if sizeInt < len(sb.data)-1 {
+		sb.data = sb.data[:sizeInt]
+	} else {
+		new := make([]byte, sizeInt-len(sb.data))
+		sb.data = append(sb.data, new...)
+	}
+
+	return nil
+}
+
 // Seek does a standard seek on the internal slice.
 func (sb *SeekableBuffer) Seek(offset int64, whence int) (n int64, err error) {
 	defer func() {
@@ -117,6 +135,10 @@ func (sb *SeekableBuffer) Seek(offset int64, whence int) (n int64, err error) {
 		sb.position += offset
 	} else {
 		log.Panicf("seek whence is not valid: (%d)", whence)
+	}
+
+	if sb.position < 0 {
+		sb.position = 0
 	}
 
 	return sb.position, nil

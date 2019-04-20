@@ -401,6 +401,17 @@ func TestSeekableBuffer_Seek_End_Nonempty_Zero(t *testing.T) {
 	}
 }
 
+func TestSeekableBuffer_Seek_End_Empty_SeekToNegative(t *testing.T) {
+	sb := NewSeekableBuffer()
+
+	position, err := sb.Seek(-10, os.SEEK_END)
+	log.PanicIf(err)
+
+	if position != int64(0) {
+		t.Fatalf("The seek to a negative position did not end up on zero: (%d)", position)
+	}
+}
+
 func TestSeekableBuffer_Seek_End_Nonempty_Nonzero(t *testing.T) {
 	sb := NewSeekableBuffer()
 
@@ -541,5 +552,22 @@ func TestSeekableBuffer_Bytes(t *testing.T) {
 
 	if bytes.Compare(sb.Bytes(), expected) != 0 {
 		t.Fatalf("Data did not match.")
+	}
+}
+
+func TestSeekableBuffer_Truncate(t *testing.T) {
+	sb := NewSeekableBuffer()
+
+	data := []byte("hello")
+
+	_, err := sb.Write(data)
+	log.PanicIf(err)
+
+	err = sb.Truncate(3)
+	log.PanicIf(err)
+
+	result := sb.Bytes()
+	if bytes.Compare(result, []byte("hel")) != 0 {
+		t.Fatalf("Truncated result was not expected: %v", result)
 	}
 }
