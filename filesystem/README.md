@@ -18,3 +18,7 @@ A memory structure that satisfies `io.ReadWriteSeeker`.
 # copy_bytes_between_positions
 
 Given an `io.ReadWriteSeeker`, copy N bytes from one position to an earlier position.
+
+# read_counter, write_counter
+
+Wrap `io.Reader` and `io.Writer` structs in order to report how many bytes were transferred.
