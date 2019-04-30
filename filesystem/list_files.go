@@ -15,13 +15,14 @@ type FileListFilterPredicate func(parent string, child os.FileInfo) (hit bool, e
 type VisitedFile struct {
 	Filepath string
 	Info     os.FileInfo
+	Index    int
 }
 
 // ListFiles feeds a continuous list of files from a recursive folder scan. An
 // optional predicate can be provided in order to filter. When done, the
 // `filesC` channel is closed. If there's an error, the `errC` channel will
 // receive it.
-func ListFiles(rootPath string, cb FileListFilterPredicate) (filesC chan VisitedFile, errC chan error) {
+func ListFiles(rootPath string, cb FileListFilterPredicate) (filesC chan VisitedFile, count int, errC chan error) {
 	defer func() {
 		if state := recover(); state != nil {
 			err := log.Wrap(state.(error))
@@ -40,6 +41,7 @@ func ListFiles(rootPath string, cb FileListFilterPredicate) (filesC chan Visited
 
 	filesC = make(chan VisitedFile, 100)
 	errC = make(chan error, 1)
+	index := 0
 
 	go func() {
 		defer func() {
@@ -110,11 +112,14 @@ func ListFiles(rootPath string, cb FileListFilterPredicate) (filesC chan Visited
 						}
 					}
 
+					index++
+
 					// Push file to channel.
 
 					vf := VisitedFile{
 						Filepath: filepath,
 						Info:     child,
+						Index:    index,
 					}
 
 					filesC <- vf
@@ -134,5 +139,5 @@ func ListFiles(rootPath string, cb FileListFilterPredicate) (filesC chan Visited
 		close(errC)
 	}()
 
-	return filesC, errC
+	return filesC, index, errC
 }

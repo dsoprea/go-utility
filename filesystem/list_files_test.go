@@ -11,7 +11,7 @@ import (
 
 func TestListFiles_NoPredicate(t *testing.T) {
 	scanPath := path.Join(appPath, "..")
-	filesC, errC := ListFiles(scanPath, nil)
+	filesC, _, errC := ListFiles(scanPath, nil)
 
 	visited := make([]VisitedFile, 0)
 
@@ -75,7 +75,7 @@ func TestListFiles_WithPredicate(t *testing.T) {
 		return false, nil
 	}
 
-	filesC, errC := ListFiles(scanPath, filter)
+	filesC, _, errC := ListFiles(scanPath, filter)
 
 	visited := make([]VisitedFile, 0)
 
