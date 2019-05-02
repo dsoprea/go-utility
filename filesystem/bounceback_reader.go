@@ -37,6 +37,7 @@ func NewBouncebackReader(rs io.ReadSeeker) (br *BouncebackReader, err error) {
 	return br, nil
 }
 
+// Position returns the position that we're supposed to be at.
 func (br *BouncebackReader) Position() int64 {
 	return br.currentPosition
 }

@@ -101,6 +101,7 @@ func (sb *SeekableBuffer) Read(p []byte) (n int, err error) {
 	return n, nil
 }
 
+// Truncate either chops or extends the internal buffer.
 func (sb *SeekableBuffer) Truncate(size int64) (err error) {
 	defer func() {
 		if state := recover(); state != nil {

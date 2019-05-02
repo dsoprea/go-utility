@@ -18,6 +18,7 @@ type BouncebackWriter struct {
 	statsSeeks  int
 }
 
+// NewBouncebackWriter returns a new `BouncebackWriter` struct.
 func NewBouncebackWriter(ws io.WriteSeeker) (bw *BouncebackWriter, err error) {
 	defer func() {
 		if state := recover(); state != nil {
@@ -36,18 +37,23 @@ func NewBouncebackWriter(ws io.WriteSeeker) (bw *BouncebackWriter, err error) {
 	return bw, nil
 }
 
+// Position returns the position that we're supposed to be at.
 func (bw *BouncebackWriter) Position() int64 {
 	return bw.currentPosition
 }
 
+// StatsWrites returns the number of write operations.
 func (bw *BouncebackWriter) StatsWrites() int {
 	return bw.statsWrites
 }
 
+// StatsSeeks returns the number of seek operations.
 func (bw *BouncebackWriter) StatsSeeks() int {
 	return bw.statsSeeks
 }
 
+// Seek puts us at a specific position in the internal writer for the next
+// write/seek.
 func (bw *BouncebackWriter) Seek(offset int64, whence int) (newPosition int64, err error) {
 	defer func() {
 		if state := recover(); state != nil {
@@ -64,6 +70,8 @@ func (bw *BouncebackWriter) Seek(offset int64, whence int) (newPosition int64, e
 	return newPosition, nil
 }
 
+// Write performs a write against the internal `WriteSeeker` starting at the
+// position that we're supposed to be at.
 func (bw *BouncebackWriter) Write(p []byte) (n int, err error) {
 	defer func() {
 		if state := recover(); state != nil {
