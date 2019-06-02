@@ -22,3 +22,7 @@ Given an `io.ReadWriteSeeker`, copy N bytes from one position to an earlier posi
 # read_counter, write_counter
 
 Wrap `io.Reader` and `io.Writer` structs in order to report how many bytes were transferred.
+
+# readseekwritecloser
+
+Provides the ReadWriteSeekCloser interface that combines a RWS and a Closer. Also provides a no-op wrapper to augment a plain RWS with a closer.
