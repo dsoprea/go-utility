@@ -1,42 +1,57 @@
 package ridata
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/dsoprea/go-logging"
 )
 
+var (
+	// ErrLruEmpty indicates that the LRU is empty..
+	ErrLruEmpty = errors.New("lru is empty")
+)
+
+// LruKey is the type of an LRU key.
+type LruKey interface{}
+
+// LruItem is the interface that any item we add to the LRU must satisfy.
+type LruItem interface {
+	Id() LruKey
+}
+
 type lruNode struct {
 	before *lruNode
 	after  *lruNode
-	id     interface{}
+	item   LruItem
 }
 
+// String will return a string representation of the node.
 func (ln *lruNode) String() string {
 	var beforePhrase string
 	if ln.before != nil {
-		beforePhrase = fmt.Sprintf("%v", ln.before.id)
+		beforePhrase = fmt.Sprintf("%v", ln.before.item.Id())
 	} else {
 		beforePhrase = "<NULL>"
 	}
 
 	var afterPhrase string
 	if ln.after != nil {
-		afterPhrase = fmt.Sprintf("%v", ln.after.id)
+		afterPhrase = fmt.Sprintf("%v", ln.after.item.Id())
 	} else {
 		afterPhrase = "<NULL>"
 	}
 
-	return fmt.Sprintf("[%v] BEFORE=[%s] AFTER=[%s]", ln.id, beforePhrase, afterPhrase)
+	return fmt.Sprintf("[%v] BEFORE=[%s] AFTER=[%s]", ln.item.Id(), beforePhrase, afterPhrase)
 }
 
-type lruEventFunc func(id interface{}) (err error)
+type lruEventFunc func(id LruKey) (err error)
 
 // Lru establises an LRU of IDs of any type.
 type Lru struct {
 	top     *lruNode
 	bottom  *lruNode
-	lookup  map[interface{}]*lruNode
+	lookup  map[LruKey]*lruNode
 	maxSize int
 	dropCb  lruEventFunc
 }
@@ -44,7 +59,7 @@ type Lru struct {
 // NewLru returns a new instance.
 func NewLru(maxSize int) *Lru {
 	return &Lru{
-		lookup:  make(map[interface{}]*lruNode),
+		lookup:  make(map[LruKey]*lruNode),
 		maxSize: maxSize,
 	}
 }
@@ -55,33 +70,64 @@ func (lru *Lru) SetDropCb(cb lruEventFunc) {
 	lru.dropCb = cb
 }
 
-// Size returns the number of items in the LRU.
-func (lru *Lru) Size() int {
+// Count returns the number of items in the LRU.
+func (lru *Lru) Count() int {
 	return len(lru.lookup)
 }
 
-// Touch bumps an item to the front of the LRU. It will be added if it doesn't
-// already exist. If as a result of adding an item the LRU exceeds the maximum
-// size, the least recently used item will be discarded.
-func (lru *Lru) Touch(id interface{}) (err error) {
+// IsFull will return true if at capacity.
+func (lru *Lru) IsFull() bool {
+	return lru.Count() == lru.maxSize
+}
+
+// Exists will do a membership check for the given key.
+func (lru *Lru) Exists(id LruKey) bool {
+	_, found := lru.lookup[id]
+	return found
+}
+
+// Get touches the cache and returns the data.
+func (lru *Lru) Get(id LruKey) (found bool, item LruItem, err error) {
 	defer func() {
 		if state := recover(); state != nil {
 			err = log.Wrap(state.(error))
 		}
 	}()
 
+	if node, found := lru.lookup[id]; found == true {
+		_, _, err := lru.Set(node.item)
+		log.PanicIf(err)
+
+		return true, node.item, nil
+	}
+
+	return false, nil, nil
+}
+
+// Set bumps an item to the front of the LRU. It will be added if it doesn't
+// already exist. If as a result of adding an item the LRU exceeds the maximum
+// size, the least recently used item will be discarded.
+//
+// If it was not previously in the LRU, `added` will be `true`.
+func (lru *Lru) Set(item LruItem) (added bool, droppedItem LruItem, err error) {
+	defer func() {
+		if state := recover(); state != nil {
+			err = log.Wrap(state.(error))
+		}
+	}()
+
+	// TODO(dustin): !! Add tests for added/droppedItem returns.
+
+	id := item.Id()
+
 	node, found := lru.lookup[id]
+
+	added = (found == false)
 
 	if found == true {
 		// It's already at the front.
 		if node.before == nil {
-			return nil
-		}
-
-		// Prune.
-		if node.before != nil {
-			node.before.after = node.after
-			node.before = nil
+			return added, nil, nil
 		}
 
 		// If we were at the bottom, the bottom is now whatever was upstream of
@@ -90,19 +136,28 @@ func (lru *Lru) Touch(id interface{}) (err error) {
 			lru.bottom = lru.bottom.before
 		}
 
+		// Prune.
+		if node.before != nil {
+			node.before.after = node.after
+			node.before = nil
+		}
+
 		// Insert at the front.
 		node.after = lru.top
+
+		// Point the head of the list to us.
+		lru.top = node
 	} else {
 		node = &lruNode{
-			id:    id,
 			after: lru.top,
+			item:  item,
 		}
 
 		lru.lookup[id] = node
-	}
 
-	// Point the head of the list to us.
-	lru.top = node
+		// Point the head of the list to us.
+		lru.top = node
+	}
 
 	// Update the link from the downstream node.
 	if node.after != nil {
@@ -114,19 +169,24 @@ func (lru *Lru) Touch(id interface{}) (err error) {
 	}
 
 	if len(lru.lookup) > lru.maxSize {
-		found, err := lru.Drop(lru.bottom.id)
+		lastItemId := lru.Oldest()
+		lastNode := lru.lookup[lastItemId]
+
+		found, err := lru.Drop(lastItemId)
 		log.PanicIf(err)
 
 		if found == false {
 			log.Panicf("drop of old item was ineffectual")
 		}
+
+		droppedItem = lastNode.item
 	}
 
-	return nil
+	return added, droppedItem, nil
 }
 
 // Drop discards the given item.
-func (lru *Lru) Drop(id interface{}) (found bool, err error) {
+func (lru *Lru) Drop(id LruKey) (found bool, err error) {
 	defer func() {
 		if state := recover(); state != nil {
 			err = log.Wrap(state.(error))
@@ -163,27 +223,27 @@ func (lru *Lru) Drop(id interface{}) (found bool, err error) {
 	return true, nil
 }
 
-// First returns the most recently used ID.
-func (lru *Lru) First() interface{} {
+// Newest returns the most recently used ID.
+func (lru *Lru) Newest() LruKey {
 	if lru.top != nil {
-		return lru.top.id
+		return lru.top.item.Id()
 	}
 
 	return nil
 }
 
-// Last returns the least recently used ID.
-func (lru *Lru) Last() interface{} {
+// Oldest returns the least recently used ID.
+func (lru *Lru) Oldest() LruKey {
 	if lru.bottom != nil {
-		return lru.bottom.id
+		return lru.bottom.item.Id()
 	}
 
 	return nil
 }
 
 // All returns a list of all IDs.
-func (lru *Lru) All() []interface{} {
-	collected := make([]interface{}, len(lru.lookup))
+func (lru *Lru) All() []LruKey {
+	collected := make([]LruKey, len(lru.lookup))
 	i := 0
 	for value := range lru.lookup {
 		collected[i] = value
@@ -191,6 +251,29 @@ func (lru *Lru) All() []interface{} {
 	}
 
 	return collected
+}
+
+// PopOldest will pop the oldest entry out of the LRU and return it. It will
+// return ErrLruEmpty when empty.
+func (lru *Lru) PopOldest() (item LruItem, err error) {
+	lk := lru.Oldest()
+	if lk == nil {
+		return nil, ErrLruEmpty
+	}
+
+	node := lru.lookup[lk]
+	if node == nil {
+		log.Panicf("something went wrong resolving the oldest item")
+	}
+
+	found, err := lru.Drop(lk)
+	log.PanicIf(err)
+
+	if found == false {
+		log.Panicf("something went wrong dropping the oldest item")
+	}
+
+	return node.item, nil
 }
 
 // Dump returns a list of all IDs.
