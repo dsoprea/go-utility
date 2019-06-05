@@ -615,3 +615,45 @@ func TestLru_PopOldest(t *testing.T) {
 		t.Fatalf("Expected ErrLruEmpty for empty LRU.")
 	}
 }
+
+func TestLru_FindPosition(t *testing.T) {
+	lru := NewLru(2)
+
+	// Load.
+
+	tli1 := testLruItem{
+		id: 11,
+	}
+
+	_, _, err := lru.Set(tli1)
+	log.PanicIf(err)
+
+	p := lru.FindPosition(11)
+	if p != 0 {
+		t.Fatalf("Position not correct (1).")
+	}
+
+	tli2 := testLruItem{
+		id: 22,
+	}
+
+	_, _, err = lru.Set(tli2)
+	log.PanicIf(err)
+
+	// Was the first item pushed back by one?
+
+	p = lru.FindPosition(11)
+	if p != 1 {
+		t.Fatalf("Position not correct (1).")
+	}
+
+	_, _, err = lru.Set(tli1)
+	log.PanicIf(err)
+
+	// Is it back?
+
+	p = lru.FindPosition(11)
+	if p != 0 {
+		t.Fatalf("Position not correct (3).")
+	}
+}

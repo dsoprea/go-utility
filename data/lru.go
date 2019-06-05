@@ -86,6 +86,24 @@ func (lru *Lru) Exists(id LruKey) bool {
 	return found
 }
 
+// FindPosition will return the numerical position in the list. Since the LRU
+// will never be very large, this call is not expensive, per se. But, it *is*
+// O(n) and any call to us will compound with any loops you happen to wrap us
+// into.
+func (lru *Lru) FindPosition(id LruKey) int {
+	node, found := lru.lookup[id]
+	if found == false {
+		return -1
+	}
+
+	position := 0
+	for ; node.before != nil; node = node.before {
+		position++
+	}
+
+	return position
+}
+
 // Get touches the cache and returns the data.
 func (lru *Lru) Get(id LruKey) (found bool, item LruItem, err error) {
 	defer func() {
