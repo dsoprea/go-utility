@@ -75,6 +75,11 @@ func (lru *Lru) Count() int {
 	return len(lru.lookup)
 }
 
+// MaxCount returns the maximum number of items the LRU can contain.
+func (lru *Lru) MaxCount() int {
+	return lru.maxSize
+}
+
 // IsFull will return true if at capacity.
 func (lru *Lru) IsFull() bool {
 	return lru.Count() == lru.maxSize

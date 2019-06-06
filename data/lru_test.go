@@ -657,3 +657,17 @@ func TestLru_FindPosition(t *testing.T) {
 		t.Fatalf("Position not correct (3).")
 	}
 }
+
+func TestLru_MaxCount(t *testing.T) {
+	lru := NewLru(2)
+
+	if lru.MaxCount() != 2 {
+		t.Fatalf("MaxCount not correct (1).")
+	}
+
+	lru = NewLru(55)
+
+	if lru.MaxCount() != 55 {
+		t.Fatalf("MaxCount not correct (2).")
+	}
+}
