@@ -26,3 +26,11 @@ Wrap `io.Reader` and `io.Writer` structs in order to report how many bytes were 
 # readseekwritecloser
 
 Provides the ReadWriteSeekCloser interface that combines a RWS and a Closer. Also provides a no-op wrapper to augment a plain RWS with a closer.
+
+# bounedreadwriteseek
+
+Wraps a ReadWriteSeeker such that no seeks can be at an offset less than a specific-offset.
+
+# calculateseek
+
+Provides a reusable function with which to calculate seek offsets.
