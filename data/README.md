@@ -6,3 +6,7 @@
 # lru
 
 An LRU implementation. Accessors available for the first item, last item, list of all keys, count, fullness, membership checks, explicit drops, and popping the oldest in a loop. You can also set a callback for when items are dropped and dump the current contents of the LRU.
+
+# mimetype
+
+Convenience function for determining a mime-type from an `io.Reader`.
