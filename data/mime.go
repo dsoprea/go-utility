@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	MimetypeLeadBytes = 512
+	MimetypeLeadBytesCount = 512
 )
 
 // GetMimetypeFromContent uses net/http to map from magic-bytes to mime-type.
@@ -22,7 +22,7 @@ func GetMimetypeFromContent(r io.Reader, fileSize int) (mimetype string, err err
 
 	// TODO(dustin): !! Add test.
 
-	leadCount := MimetypeLeadBytes
+	leadCount := MimetypeLeadBytesCount
 	if fileSize > 0 && fileSize < leadCount {
 		leadCount = fileSize
 	}
@@ -30,7 +30,16 @@ func GetMimetypeFromContent(r io.Reader, fileSize int) (mimetype string, err err
 	buffer := make([]byte, leadCount)
 
 	n, err := io.ReadFull(r, buffer)
-	log.PanicIf(err)
+	if err != nil {
+		// We can return EOF if a) we weren't given a filesize and the file did
+		// not haveat least as many bytes as we check by default, or b) the file-
+		// size is actually (0).
+		if err == io.EOF {
+			return "", err
+		}
+
+		log.Panic(err)
+	}
 
 	buffer = buffer[:n]
 
