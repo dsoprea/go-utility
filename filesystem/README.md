@@ -49,3 +49,8 @@ each call. The reader wrapper also invokes the callback upon EOF.
 # does_exist
 
 Check whether a file/directory exists using a file-path.
+
+# graceful_copy
+
+Do a copy but correctly handle short-writes and reads that might return a non-
+zero read count *and* EOF.
