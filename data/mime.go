@@ -13,7 +13,7 @@ const (
 )
 
 // GetMimetypeFromContent uses net/http to map from magic-bytes to mime-type.
-func GetMimetypeFromContent(r io.Reader, fileSize int) (mimetype string, err error) {
+func GetMimetypeFromContent(r io.Reader, fileSize int64) (mimetype string, err error) {
 	defer func() {
 		if state := recover(); state != nil {
 			err = log.Wrap(state.(error))
@@ -22,7 +22,7 @@ func GetMimetypeFromContent(r io.Reader, fileSize int) (mimetype string, err err
 
 	// TODO(dustin): !! Add test.
 
-	leadCount := MimetypeLeadBytesCount
+	leadCount := int64(MimetypeLeadBytesCount)
 	if fileSize > 0 && fileSize < leadCount {
 		leadCount = fileSize
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 // CalculateSeek calculates an offset in a file-stream given the parameters.
-func CalculateSeek(currentOffset int64, delta int64, whence int, fileSize int) (finalOffset int64, err error) {
+func CalculateSeek(currentOffset int64, delta int64, whence int, fileSize int64) (finalOffset int64, err error) {
 	defer func() {
 		if state := recover(); state != nil {
 			err = log.Wrap(state.(error))
@@ -20,7 +20,7 @@ func CalculateSeek(currentOffset int64, delta int64, whence int, fileSize int) (
 	} else if whence == os.SEEK_CUR {
 		finalOffset = currentOffset + delta
 	} else if whence == os.SEEK_END {
-		finalOffset = int64(fileSize) + delta
+		finalOffset = fileSize + delta
 	} else {
 		log.Panicf("whence not valid: (%d)", whence)
 	}

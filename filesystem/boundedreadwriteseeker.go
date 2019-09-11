@@ -25,11 +25,11 @@ type BoundedReadWriteSeeker struct {
 	currentOffset int64
 	minimumOffset int64
 
-	staticFileSize int
+	staticFileSize int64
 }
 
 // NewBoundedReadWriteSeeker returns a new BoundedReadWriteSeeker instance.
-func NewBoundedReadWriteSeeker(rws io.ReadWriteSeeker, minimumOffset int64, staticFileSize int) (brws *BoundedReadWriteSeeker, err error) {
+func NewBoundedReadWriteSeeker(rws io.ReadWriteSeeker, minimumOffset int64, staticFileSize int64) (brws *BoundedReadWriteSeeker, err error) {
 	defer func() {
 		if state := recover(); state != nil {
 			err = log.Wrap(state.(error))
@@ -72,13 +72,13 @@ func (brws *BoundedReadWriteSeeker) Seek(offset int64, whence int) (updatedOffse
 		realFileSizeRaw, err := brws.ReadWriteSeeker.Seek(0, os.SEEK_END)
 		log.PanicIf(err)
 
-		fileSize = int(realFileSizeRaw - brws.minimumOffset)
+		fileSize = realFileSizeRaw - brws.minimumOffset
 	}
 
 	updatedOffset, err = CalculateSeek(brws.currentOffset, offset, whence, fileSize)
 	log.PanicIf(err)
 
-	if brws.staticFileSize != 0 && int(updatedOffset) > brws.staticFileSize {
+	if brws.staticFileSize != 0 && updatedOffset > brws.staticFileSize {
 		//updatedOffset = int64(brws.staticFileSize)
 
 		// NOTE(dustin): Presumably, this will only be disruptive to writes that are beyond the boundaries, which, if we're being used at all, should already account for the boundary and prevent this error from ever happening. So, time will tell how disruptive this is.
@@ -106,12 +106,12 @@ func (brws *BoundedReadWriteSeeker) Read(buffer []byte) (readCount int, err erro
 	}()
 
 	if brws.staticFileSize != 0 {
-		availableCount := brws.staticFileSize - int(brws.currentOffset)
+		availableCount := brws.staticFileSize - brws.currentOffset
 		if availableCount == 0 {
 			return 0, io.EOF
 		}
 
-		if len(buffer) > availableCount {
+		if int64(len(buffer)) > availableCount {
 			buffer = buffer[:availableCount]
 		}
 	}

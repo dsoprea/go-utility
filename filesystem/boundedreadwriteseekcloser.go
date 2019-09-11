@@ -14,7 +14,7 @@ type BoundedReadWriteSeekCloser struct {
 }
 
 // NewBoundedReadWriteSeekCloser returns a new BoundedReadWriteSeekCloser.
-func NewBoundedReadWriteSeekCloser(rwsc ReadWriteSeekCloser, minimumOffset int64, staticFileSize int) (brwsc *BoundedReadWriteSeekCloser, err error) {
+func NewBoundedReadWriteSeekCloser(rwsc ReadWriteSeekCloser, minimumOffset int64, staticFileSize int64) (brwsc *BoundedReadWriteSeekCloser, err error) {
 	defer func() {
 		if state := recover(); state != nil {
 			err = log.Wrap(state.(error))
