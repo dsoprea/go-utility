@@ -54,7 +54,7 @@ func TestGetMimetypeFromContent__ShortData_Success(t *testing.T) {
 
     b := rifs.NewSeekableBufferWithBytes(buffer)
 
-    mimetype, err := GetMimetypeFromContent(b, len(buffer))
+    mimetype, err := GetMimetypeFromContent(b, int64(len(buffer)))
     log.PanicIf(err)
 
     if mimetype != "image/jpeg" {
