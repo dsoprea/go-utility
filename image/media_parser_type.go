@@ -17,17 +17,17 @@ type MediaContext interface {
 // imported from other projects. We don't use it directly, but we use this to
 // impose structure.
 type MediaParser interface {
-	// Parse parses a stream using an `io.Reader`. `ec` should *actually* be a
-	// `ExifContext`.
-	Parse(r io.ReadSeeker, size int) (ec MediaContext, err error)
-
-	// ParseFile parses a stream using a file. `ec` should *actually* be a
-	// `ExifContext`.
-	ParseFile(filepath string) (ec MediaContext, err error)
-
-	// ParseBytes parses a stream direct from bytes. `ec` should *actually* be
+	// Parse parses a stream using an `io.ReadSeeker`. `mc` should *actually* be
 	// a `ExifContext`.
-	ParseBytes(data []byte) (ec MediaContext, err error)
+	Parse(r io.ReadSeeker, size int) (mc MediaContext, err error)
+
+	// ParseFile parses a stream using a file. `mc` should *actually* be a
+	// `ExifContext`.
+	ParseFile(filepath string) (mc MediaContext, err error)
+
+	// ParseBytes parses a stream direct from bytes. `mc` should *actually* be
+	// a `ExifContext`.
+	ParseBytes(data []byte) (mc MediaContext, err error)
 
 	// Parses the data to determine if it's a compatible format.
 	LooksLikeFormat(data []byte) bool
