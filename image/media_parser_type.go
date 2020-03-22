@@ -19,7 +19,7 @@ type MediaContext interface {
 type MediaParser interface {
 	// Parse parses a stream using an `io.Reader`. `ec` should *actually* be a
 	// `ExifContext`.
-	Parse(r io.Reader, size int) (ec MediaContext, err error)
+	Parse(r io.ReadSeeker, size int) (ec MediaContext, err error)
 
 	// ParseFile parses a stream using a file. `ec` should *actually* be a
 	// `ExifContext`.
