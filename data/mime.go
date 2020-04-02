@@ -2,6 +2,7 @@ package ridata
 
 import (
 	"io"
+	"os"
 
 	"net/http"
 
@@ -47,4 +48,35 @@ func GetMimetypeFromContent(r io.Reader, fileSize int64) (mimetype string, err e
 	contentType := http.DetectContentType(buffer)
 
 	return contentType, nil
+}
+
+// DetectMimetype is a wrapper for GetMimetypeFromContent which returns the
+// mime-type for the given `File`. An empty-string is returned if it is a zero-
+// length file.
+func DetectMimetype(f *os.File) (mimetype string, err error) {
+	defer func() {
+		if state := recover(); state != nil {
+			err = log.Wrap(state.(error))
+		}
+	}()
+
+	originalOffsetRaw, err := f.Seek(0, os.SEEK_CUR)
+	log.PanicIf(err)
+
+	fi, err := f.Stat()
+	log.PanicIf(err)
+
+	fileSize := fi.Size()
+
+	if fileSize == 0 {
+		return "", nil
+	} else {
+		mimetype, err = GetMimetypeFromContent(f, fileSize)
+		log.PanicIf(err)
+	}
+
+	_, err = f.Seek(originalOffsetRaw, os.SEEK_SET)
+	log.PanicIf(err)
+
+	return mimetype, nil
 }
