@@ -120,6 +120,40 @@ func TestRestoreTty(t *testing.T) {
 	}
 }
 
+func TestRestoreAndDumpTty(t *testing.T) {
+	if rtty != nil {
+		t.Fatalf("rtty global is not nil")
+	}
+
+	originalStdin := os.Stdin
+	originalStdout := os.Stdout
+	originalStderr := os.Stderr
+
+	RedirectTty()
+
+	if rtty == nil {
+		t.Fatalf("rtty is nil after redirect.")
+	}
+
+	if rtty.originalStdin != originalStdin {
+		t.Fatalf("Captured STDIN is not correct.")
+	} else if rtty.originalStdout != originalStdout {
+		t.Fatalf("Captured STDOUT is not correct.")
+	} else if rtty.originalStderr != originalStderr {
+		t.Fatalf("Captured STDERR is not correct.")
+	}
+
+	RestoreAndDumpTty()
+
+	if os.Stdin != originalStdin {
+		t.Fatalf("Restored STDIN is not correct.")
+	} else if os.Stdout != originalStdout {
+		t.Fatalf("Restored STDOUT is not correct.")
+	} else if os.Stderr != originalStderr {
+		t.Fatalf("Restored STDERR is not correct.")
+	}
+}
+
 func TestStdinWriter(t *testing.T) {
 	RedirectTty()
 

@@ -1,7 +1,10 @@
 package ritesting
 
 import (
+	"fmt"
 	"os"
+
+	"io/ioutil"
 
 	"github.com/dsoprea/go-logging"
 )
@@ -63,6 +66,42 @@ func RestoreTty() {
 	os.Stderr = rtty.originalStderr
 
 	rtty = nil
+}
+
+// RestoreAndDumpTty restores original TTY resources but not before grabbing
+// their screen output and then printing it before returning.
+func RestoreAndDumpTty() {
+	if rtty == nil {
+		return
+	}
+
+	// TODO(dustin): !! Finish. Close os.Stdout and os.Stderr, read each, and print each between anchors.
+
+	os.Stdout.Close()
+
+	stdoutOutput, err := ioutil.ReadAll(rtty.newStdoutReader)
+	log.PanicIf(err)
+
+	os.Stderr.Close()
+
+	stderrOutput, err := ioutil.ReadAll(rtty.newStderrReader)
+	log.PanicIf(err)
+
+	RestoreTty()
+
+	fmt.Printf(">>>>>>>>>>>>>\n")
+	fmt.Printf("STDOUT OUTPUT\n")
+	fmt.Printf(">>>>>>>>>>>>>\n")
+	fmt.Println(string(stdoutOutput))
+	fmt.Printf("<<<<<<<<<<<<<\n")
+	fmt.Printf("\n")
+
+	fmt.Printf(">>>>>>>>>>>>>\n")
+	fmt.Printf("STDERR OUTPUT\n")
+	fmt.Printf(">>>>>>>>>>>>>\n")
+	fmt.Println(string(stderrOutput))
+	fmt.Printf("<<<<<<<<<<<<<\n")
+	fmt.Printf("\n")
 }
 
 // StdinWriter returns a writer that can be used to feed STDIN data (if
