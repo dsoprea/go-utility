@@ -55,7 +55,7 @@ func RedirectTty() {
 // RestoreTty restores original TTY resources.
 func RestoreTty() {
 	if rtty == nil {
-		log.Panicf("no TTY redirected; can not restore")
+		return
 	}
 
 	os.Stdin = rtty.originalStdin
