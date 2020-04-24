@@ -7,3 +7,8 @@
 
 This will temporarily redirect the process TTY resources to support writing
 unit-tests directly against `main()` functions.
+
+# handled_exit
+
+Can switch between `os.Exit()` and panicing a return-code. Supports testing
+`main()`. Requires calls to `os.Exit()` to call `Exit()` here instead.
