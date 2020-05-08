@@ -59,3 +59,6 @@ zero read count *and* EOF.
 
 A wrapper that allows an `io.ReadSeeker` to be used as a `io.ReaderAt`.
 
+# simplefileinfo
+
+An implementation of `os.FileInfo` to support testing.
