@@ -35,5 +35,5 @@ func TestGetAndDisableMarshaledExits(t *testing.T) {
 		}
 	}()
 
-	Exit(88, 0)
+	Exit(88)
 }
