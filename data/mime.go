@@ -3,6 +3,7 @@ package ridata
 import (
 	"io"
 	"os"
+	"strings"
 
 	"net/http"
 
@@ -46,6 +47,8 @@ func GetMimetypeFromContent(r io.Reader, fileSize int64) (mimetype string, err e
 
 	// Always returns a valid mime-type.
 	contentType := http.DetectContentType(buffer)
+
+	contentType = strings.TrimRight(contentType, ";")
 
 	return contentType, nil
 }
