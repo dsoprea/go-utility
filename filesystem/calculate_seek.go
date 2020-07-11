@@ -1,10 +1,29 @@
 package rifs
 
 import (
+	"io"
 	"os"
 
 	"github.com/dsoprea/go-logging"
 )
+
+// SeekType
+type SeekType int
+
+// String is a convenience function to associate the different seek-types with
+// printable descriptions.
+func (n SeekType) String() string {
+	if n == io.SeekCurrent {
+		return "SEEK-CURRENT"
+	} else if n == io.SeekEnd {
+		return "SEEK-END"
+	} else if n == io.SeekStart {
+		return "SEEK-START"
+	}
+
+	log.Panicf("unknown seek-type: (%d)", n)
+	return ""
+}
 
 // CalculateSeek calculates an offset in a file-stream given the parameters.
 func CalculateSeek(currentOffset int64, delta int64, whence int, fileSize int64) (finalOffset int64, err error) {

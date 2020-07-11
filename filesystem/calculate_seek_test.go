@@ -1,6 +1,7 @@
 package rifs
 
 import (
+	"io"
 	"os"
 	"testing"
 
@@ -103,5 +104,26 @@ func TestCalculateSeek__BadWhence(t *testing.T) {
 		t.Fatalf("Expected failure for bad whence.")
 	} else if err.Error() != "whence not valid: (99)" {
 		log.Panic(err)
+	}
+}
+
+func TestSeekType_String_Current(t *testing.T) {
+	s := SeekType(io.SeekCurrent).String()
+	if s != "SEEK-CURRENT" {
+		t.Fatalf("'Current' description not correct: [%s]", s)
+	}
+}
+
+func TestSeekType_String_Start(t *testing.T) {
+	s := SeekType(io.SeekStart).String()
+	if s != "SEEK-START" {
+		t.Fatalf("'Start' description not correct: [%s]", s)
+	}
+}
+
+func TestSeekType_String_End(t *testing.T) {
+	s := SeekType(io.SeekEnd).String()
+	if s != "SEEK-END" {
+		t.Fatalf("'End' description not correct: [%s]", s)
 	}
 }
