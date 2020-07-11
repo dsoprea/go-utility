@@ -43,14 +43,13 @@ func TestBouncebackReader(t *testing.T) {
 		t.Fatalf("Collected bytes not correct.\nACTUAL:\n%v\nEXPECTED:\n%v", collected, expected)
 	}
 
-	reads := br.StatsReads()
-	if reads != 10 {
-		t.Fatalf("Read count is not correct: (%d)", reads)
+	expectedStats := BouncebackStats{
+		reads: 10,
+		syncs: 9,
 	}
 
-	seeks := br.StatsSeeks()
-	if seeks != 9 {
-		t.Fatalf("Seek count is not correct: (%d)", seeks)
+	if br.bouncebackBase.stats != expectedStats {
+		t.Fatalf("Stats not correct: %s", br.bouncebackBase.stats)
 	}
 
 	// Do another couple of reads that won't actually do anything.
@@ -69,14 +68,13 @@ func TestBouncebackReader(t *testing.T) {
 
 	// We should've bumped the reads and seeks by two.
 
-	seeks = br.StatsSeeks()
-	if seeks != 11 {
-		t.Fatalf("Seek count is not correct (2): (%d)", seeks)
+	expectedStats = BouncebackStats{
+		reads: 12,
+		syncs: 10,
 	}
 
-	reads = br.StatsReads()
-	if reads != 12 {
-		t.Fatalf("Read count is not correct (2): (%d)", reads)
+	if br.bouncebackBase.stats != expectedStats {
+		t.Fatalf("Stats not correct: %s", br.bouncebackBase.stats)
 	}
 }
 
@@ -111,5 +109,55 @@ func TestBouncebackWriter(t *testing.T) {
 	writes := bw.StatsWrites()
 	if writes != len(input) {
 		t.Fatalf("Write count is not correct (2): (%d)", writes)
+	}
+}
+
+func TestBouncebackBase_checkPosition__without_sync(t *testing.T) {
+	bb := bouncebackBase{
+		currentPosition: 0,
+	}
+
+	sb := NewSeekableBuffer()
+
+	err := bb.checkPosition(sb)
+	log.PanicIf(err)
+
+	actualPosition, err := sb.Seek(0, io.SeekCurrent)
+	log.PanicIf(err)
+
+	if actualPosition != 0 {
+		t.Fatalf("Actual position is not correct: (%d)", actualPosition)
+	}
+
+	expectedStats := BouncebackStats{}
+
+	if bb.stats != expectedStats {
+		t.Fatalf("Stats not correct: %s", bb.stats)
+	}
+}
+
+func TestBouncebackBase_checkPosition__with_sync(t *testing.T) {
+	bb := bouncebackBase{
+		currentPosition: 11,
+	}
+
+	sb := NewSeekableBuffer()
+
+	err := bb.checkPosition(sb)
+	log.PanicIf(err)
+
+	actualPosition, err := sb.Seek(0, io.SeekCurrent)
+	log.PanicIf(err)
+
+	if actualPosition != 11 {
+		t.Fatalf("Actual position is not correct: (%d)", actualPosition)
+	}
+
+	expectedStats := BouncebackStats{
+		syncs: 1,
+	}
+
+	if bb.stats != expectedStats {
+		t.Fatalf("Stats not correct: %s", bb.stats)
 	}
 }
