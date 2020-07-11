@@ -3,7 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/dsoprea/go-utility/badge.svg?branch=master)](https://coveralls.io/github/dsoprea/go-utility?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/dsoprea/go-utility)](https://goreportcard.com/report/github.com/dsoprea/go-utility)
 
-# bounceback_reader, bounceback_writer
+# bounceback
 
 An `io.ReadSeeker` and `io.WriteSeeker` that returns to the right place before
 reading or writing. Useful when the same file resource is being reused for reads
@@ -32,7 +32,7 @@ transferred.
 Provides the ReadWriteSeekCloser interface that combines a RWS and a Closer.
 Also provides a no-op wrapper to augment a plain RWS with a closer.
 
-# bounedreadwriteseek
+# boundedreadwriteseek
 
 Wraps a ReadWriteSeeker such that no seeks can be at an offset less than a
 specific-offset.
