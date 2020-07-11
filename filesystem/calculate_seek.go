@@ -7,11 +7,11 @@ import (
 	"github.com/dsoprea/go-logging"
 )
 
-// SeekType
+// SeekType is a convenience type to associate the different seek-types with
+// printable descriptions.
 type SeekType int
 
-// String is a convenience function to associate the different seek-types with
-// printable descriptions.
+// String returns a descriptive string.
 func (n SeekType) String() string {
 	if n == io.SeekCurrent {
 		return "SEEK-CURRENT"

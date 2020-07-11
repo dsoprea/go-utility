@@ -1,7 +1,7 @@
 package rifs
 
 import (
-    "os"
+	"os"
 )
 
 // DoesExist returns true if we can open the given file/path without error. We
@@ -9,11 +9,11 @@ import (
 // the parent directory doesn't exist, and really the only important thing is if
 // it exists *and* it's readable.
 func DoesExist(filepath string) bool {
-    f, err := os.Open(filepath)
-    if err != nil {
-        return false
-    }
+	f, err := os.Open(filepath)
+	if err != nil {
+		return false
+	}
 
-    f.Close()
-    return true
+	f.Close()
+	return true
 }

@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	// MimetypeLeadBytesCount is the number of bytes to use for detection.
 	MimetypeLeadBytesCount = 512
 )
 
@@ -73,10 +74,10 @@ func DetectMimetype(f *os.File) (mimetype string, err error) {
 
 	if fileSize == 0 {
 		return "", nil
-	} else {
-		mimetype, err = GetMimetypeFromContent(f, fileSize)
-		log.PanicIf(err)
 	}
+
+	mimetype, err = GetMimetypeFromContent(f, fileSize)
+	log.PanicIf(err)
 
 	_, err = f.Seek(originalOffsetRaw, os.SEEK_SET)
 	log.PanicIf(err)

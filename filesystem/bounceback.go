@@ -7,6 +7,7 @@ import (
 	"github.com/dsoprea/go-logging"
 )
 
+// BouncebackStats describes operation counts.
 type BouncebackStats struct {
 	reads  int
 	writes int
