@@ -1,6 +1,6 @@
 module github.com/dsoprea/go-utility
 
-go 1.13
+go 1.12
 
 require (
 	github.com/dsoprea/go-exif/v2 v2.0.0-20200321225314-640175a69fe4

@@ -9,7 +9,6 @@ env:
   - GO111MODULE=on
 install:
   - go get -t ./...
-  - go get github.com/mattn/goveralls
 script:
 # v1
   - cd crypto
