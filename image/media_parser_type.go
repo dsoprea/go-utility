@@ -1,6 +1,7 @@
 package riimage
 
 import (
+	"image"
 	"io"
 
 	"github.com/dsoprea/go-exif/v2"
@@ -31,4 +32,7 @@ type MediaParser interface {
 
 	// Parses the data to determine if it's a compatible format.
 	LooksLikeFormat(data []byte) bool
+
+	// Image returns an image.Image-compatible struct.
+	GetImage(r io.Reader) (img image.Image, err error)
 }
