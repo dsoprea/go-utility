@@ -11,4 +11,23 @@ install:
   - go get -t ./...
   - go get github.com/mattn/goveralls
 script:
-  - goveralls -v -service=travis-ci
+# v1
+  - cd crypto
+  - go test -v ./...
+  - cd ../data
+  - go test -v ./...
+  - cd ../filesystem
+  - go test -v ./...
+  - cd ../geographic
+  - go test -v ./...
+  - cd ../image
+  - go test -v ./...
+  - cd ../testing
+  - go test -v ./...
+# v2
+  - cd ../v2
+  - go test -v ./... -coverprofile=coverage.txt -covermode=atomic
+  - cd ..
+after_success:
+  - cd v2
+  - curl -s https://codecov.io/bash | bash
