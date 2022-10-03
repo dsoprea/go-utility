@@ -7,7 +7,7 @@ import (
 	"encoding/hex"
 
 	"github.com/dsoprea/go-logging"
-	"github.com/dsoprea/go-utility/filesystem"
+	"github.com/dsoprea/go-utility/v2/filesystem"
 )
 
 func TestGetMimetypeFromContent(t *testing.T) {
