@@ -6,7 +6,7 @@ go 1.12
 // replace github.com/dsoprea/go-exif/v3 => ../../go-exif/v3
 
 require (
-	github.com/dsoprea/go-exif/v3 v3.0.0-20221003160559-cf5cd88aa559
+	github.com/dsoprea/go-exif/v3 v3.0.0-20221003171958-de6cb6e380a8
 	github.com/dsoprea/go-logging v0.0.0-20200710184922-b02d349568dd
 	github.com/go-errors/errors v1.4.2 // indirect
 	github.com/golang/geo v0.0.0-20210211234256-740aa86cb551
